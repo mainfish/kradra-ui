@@ -1,99 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import StarfieldBackground from '../Background/StarfieldBackground'
-import { clearAuthSession } from '../../lib/storage'
 import Panel from '../../shared/ui/Panel'
+import UserMenu from '../../shared/ui/UserMenu'
+import { logout } from '../../app/auth/logout'
 
-function MenuLink({ to, onClose, children }) {
-    return (
-        <Link
-            to={to}
-            role="menuitem"
-            onClick={onClose}
-            className="block w-full px-3 py-2 text-sm rounded-lg transition text-white/80 hover:bg-white/5 hover:text-white"
-        >
-            {children}
-        </Link>
-    )
+function delay(ms) {
+    return new Promise((r) => setTimeout(r, ms))
 }
 
-function MenuButton({ onClick, danger = false, children }) {
-    return (
-        <button
-            type="button"
-            role="menuitem"
-            onClick={onClick}
-            className={
-                'w-full text-left px-3 py-2 text-sm rounded-lg transition ' +
-                (danger
-                    ? 'text-red-200 hover:bg-red-500/10'
-                    : 'text-white/80 hover:bg-white/5 hover:text-white')
-            }
-        >
-            {children}
-        </button>
-    )
-}
-
-function UserMenu({ user, onClose, onSignOut }) {
-    const isAdmin = user?.role === 'admin'
-
-    return (
-        <div
-            role="menu"
-            className="absolute right-0 mt-3 w-72 z-50 rounded-2xl border border-white/10 bg-slate-950/90 shadow-2xl backdrop-blur-md overflow-hidden"
-        >
-            <div className="px-4 py-3">
-                <div className="text-white font-semibold leading-tight">{user?.username || 'unknown'}</div>
-                <div className="text-white/50 text-sm">{user?.role || ''}</div>
-            </div>
-
-            <div className="h-px bg-white/10" />
-
-            <div className="p-2">
-                <MenuLink to="/profile" onClose={onClose}>
-                    Profile
-                </MenuLink>
-                <MenuLink to="/settings" onClose={onClose}>
-                    Settings
-                </MenuLink>
-                {isAdmin ? (
-                    <MenuLink to="/admin" onClose={onClose}>
-                        Admin panel
-                    </MenuLink>
-                ) : null}
-            </div>
-
-            <div className="h-px bg-white/10" />
-
-            <div className="p-2">
-                <MenuButton
-                    danger
-                    onClick={() => {
-                        onClose()
-                        onSignOut()
-                    }}
-                >
-                    Sign out
-                </MenuButton>
-            </div>
-        </div>
-    )
-}
-
-function UserAvatarButton({ user, isOpen, onToggle }) {
+function UserAvatarButton({ user, isOpen, onToggle, disabled = false }) {
     const initial = (user?.username || '?').slice(0, 1).toUpperCase()
 
     return (
         <button
             type="button"
-            onClick={onToggle}
+            onClick={disabled ? undefined : onToggle}
             aria-haspopup="menu"
             aria-expanded={isOpen}
+            disabled={disabled}
             className={
                 'h-10 w-10 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md grid place-items-center ' +
-                'text-white/90 font-semibold transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20'
+                'text-white/90 font-semibold transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 ' +
+                (disabled ? 'opacity-60 pointer-events-none' : '')
             }
             title={user?.username || 'Account'}
         >
@@ -106,16 +36,26 @@ export default function AppLayout({ user, children }) {
     const navigate = useNavigate()
 
     const [open, setOpen] = useState(false)
+    const [isSigningOut, setIsSigningOut] = useState(false)
     const menuRef = useRef(null)
 
     function closeMenu() {
         setOpen(false)
     }
 
-    function handleSignOut() {
-        // Central place for logout side-effects in this layout.
-        clearAuthSession()
-        navigate('/', { replace: true })
+    async function handleSignOut() {
+        if (isSigningOut) return
+
+        setIsSigningOut(true)
+
+        try {
+            // UX: чуть-чуть подержать спиннер, чтобы действие не “мигнуло” слишком быстро
+            await Promise.all([logout(), delay(300)])
+        } finally {
+            // даже если logout упал, logout() уже сделал clearAuthSession() в finally
+            setIsSigningOut(false)
+            navigate('/', { replace: true })
+        }
     }
 
     useEffect(() => {
@@ -143,8 +83,20 @@ export default function AppLayout({ user, children }) {
 
             <div className="fixed top-6 right-6 z-40">
                 <div className="relative" ref={menuRef}>
-                    <UserAvatarButton user={user} isOpen={open} onToggle={() => setOpen((v) => !v)} />
-                    {open ? <UserMenu user={user} onClose={closeMenu} onSignOut={handleSignOut} /> : null}
+                    <UserAvatarButton
+                        user={user}
+                        isOpen={open}
+                        disabled={isSigningOut}
+                        onToggle={() => setOpen((v) => !v)}
+                    />
+                    {open ? (
+                        <UserMenu
+                            user={user}
+                            onClose={closeMenu}
+                            onSignOut={handleSignOut}
+                            isSigningOut={isSigningOut}
+                        />
+                    ) : null}
                 </div>
             </div>
 

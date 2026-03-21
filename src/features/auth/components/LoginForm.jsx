@@ -1,6 +1,7 @@
 import { useState } from 'react'
 
 import Button from '../../../shared/ui/Button'
+import LinkButton from '../../../shared/ui/LinkButton'
 import TextField from '../../../shared/ui/TextField'
 import { loginAction } from '../actions/loginAction'
 
@@ -84,10 +85,7 @@ export default function LoginForm() {
       </form>
 
       <div className="text-center text-sm text-white/60">
-        No account yet?{' '}
-        <Button variant="ghost" to="/register" className="inline-block px-0 py-0 border-0 bg-transparent hover:bg-transparent underline underline-offset-4">
-          Register
-        </Button>
+        No account yet? <LinkButton to="/register">Register</LinkButton>
       </div>
     </div>
   )

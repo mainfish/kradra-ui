@@ -16,7 +16,6 @@ async function parseJsonSafely(response) {
 }
 
 function normalizeErrorData(data, status) {
-  // Backend обычно возвращает { error: { code, message } }
   if (data && typeof data === 'object') {
     if (data.error && typeof data.error === 'object') {
       const code = data.error.code || (status === 401 ? 'unauthorized' : 'error')
@@ -61,24 +60,35 @@ export async function apiRequest(path, options = {}) {
     const token = session?.token
 
     const headers = {
-      'Content-Type': 'application/json',
       ...(options.headers || {}),
+    }
+
+    // Если тело не FormData — считаем JSON.
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
+    if (!isFormData) {
+      headers['Content-Type'] = headers['Content-Type'] || 'application/json'
     }
 
     if (token) {
       headers.Authorization = `Bearer ${token}`
     }
 
+    const body =
+      options.body == null ? undefined : isFormData ? options.body : JSON.stringify(options.body)
+
     const response = await fetch(buildUrl(path), {
       method: options.method || 'GET',
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      body,
       signal: controller.signal,
+      // ✅ IMPORTANT for refresh/csrf cookies (logout/refresh flows)
+      // By default fetch only includes credentials on same-origin requests.  [oai_citation:4‡MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials?utm_source=chatgpt.com)
+      credentials: 'include',
     })
 
     const data = await parseJsonSafely(response)
 
-    // ✅ Централизованно: любой 401 чистит сессию
+    // Централизованно: любой 401 чистит сессию
     if (response.status === 401) {
       clearAuthSession()
     }
@@ -119,4 +129,27 @@ export async function apiRequest(path, options = {}) {
   } finally {
     window.clearTimeout(timeoutId)
   }
+}
+
+/**
+ * Thin helpers over apiRequest
+ */
+export function apiGet(path, options = {}) {
+  return apiRequest(path, { ...options, method: 'GET' })
+}
+
+export function apiPost(path, body, options = {}) {
+  return apiRequest(path, { ...options, method: 'POST', body })
+}
+
+export function apiPut(path, body, options = {}) {
+  return apiRequest(path, { ...options, method: 'PUT', body })
+}
+
+export function apiPatch(path, body, options = {}) {
+  return apiRequest(path, { ...options, method: 'PATCH', body })
+}
+
+export function apiDelete(path, options = {}) {
+  return apiRequest(path, { ...options, method: 'DELETE' })
 }

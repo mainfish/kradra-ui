@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 
 import {
     AUTH_SESSION_CHANGED_EVENT,
@@ -8,7 +8,9 @@ import {
 } from '../../lib/storage'
 import { meApi } from '../../features/users/api/meApi'
 
-export function useAuthBootstrap() {
+const AuthContext = createContext(null)
+
+export function AuthProvider({ children }) {
     const [session, setSession] = useState(() => getAuthSession())
     const [isBootstrapping, setIsBootstrapping] = useState(false)
 
@@ -44,15 +46,28 @@ export function useAuthBootstrap() {
         }
 
         bootstrap()
-
         return () => {
             cancelled = true
         }
     }, [session?.token, session?.user])
 
-    return {
-        session,
-        user: session?.user || null,
-        isBootstrapping,
+    const value = useMemo(
+        () => ({
+            session,
+            user: session?.user || null,
+            isBootstrapping,
+            isAuthed: Boolean(session?.token),
+        }),
+        [session, isBootstrapping]
+    )
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function useAuth() {
+    const ctx = useContext(AuthContext)
+    if (!ctx) {
+        throw new Error('useAuth() must be used inside <AuthProvider>')
     }
+    return ctx
 }

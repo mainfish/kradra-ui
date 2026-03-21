@@ -1,5 +1,5 @@
-import { apiRequest } from '../../../lib/api'
+import { apiGet } from '../../../lib/api'
 
 export async function meApi() {
-  return apiRequest('/api/me')
+    return apiGet('/api/me')
 }
