@@ -23,7 +23,7 @@ export default function RegisterForm() {
         if (!success) return
         const t = window.setTimeout(() => {
             navigate('/', { replace: true })
-        }, 1000)
+        }, 800)
         return () => window.clearTimeout(t)
     }, [success, navigate])
 

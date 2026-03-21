@@ -76,7 +76,7 @@ export default function AppRoutes() {
 
         const t = window.setTimeout(() => {
             navigate('/', { replace: true })
-        }, 1000)
+        }, 800)
 
         return () => window.clearTimeout(t)
     }, [session?.token, location.pathname, navigate])
