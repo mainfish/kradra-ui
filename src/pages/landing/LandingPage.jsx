@@ -1,22 +1,18 @@
-import { useNavigate } from 'react-router-dom'
-
 import StarfieldBackground from '../../components/Background/StarfieldBackground'
 import Button from '../../shared/ui/Button'
 import Panel from '../../shared/ui/Panel'
 
 export default function LandingPage() {
-    const navigate = useNavigate()
-
     return (
         <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-[#05070b]">
             <StarfieldBackground />
 
             <div className="fixed top-6 right-6 z-40 flex items-center gap-3">
-                <Button variant="ghost" onClick={() => navigate('/login')}>
+                <Button variant="ghost" to="/login">
                     Log in
                 </Button>
 
-                <Button variant="primary" onClick={() => navigate('/register')}>
+                <Button variant="primary" to="/register">
                     Register
                 </Button>
             </div>

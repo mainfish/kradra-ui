@@ -1,11 +1,9 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import Button from '../../shared/ui/Button'
 import TextField from '../../shared/ui/TextField'
 
 export default function RegisterPage() {
-    const navigate = useNavigate()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
@@ -49,13 +47,9 @@ export default function RegisterPage() {
 
             <div className="text-center text-sm text-white/60">
                 Already have an account?{' '}
-                <button
-                    type="button"
-                    className="text-white underline underline-offset-4"
-                    onClick={() => navigate('/login')}
-                >
+                <Button variant="ghost" to="/login" className="inline-block px-0 py-0 border-0 bg-transparent hover:bg-transparent underline underline-offset-4">
                     Log in
-                </button>
+                </Button>
             </div>
         </div>
     )

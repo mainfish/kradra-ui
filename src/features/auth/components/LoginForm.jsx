@@ -85,9 +85,9 @@ export default function LoginForm() {
 
       <div className="text-center text-sm text-white/60">
         No account yet?{' '}
-        <a className="text-white underline underline-offset-4" href="/register">
+        <Button variant="ghost" to="/register" className="inline-block px-0 py-0 border-0 bg-transparent hover:bg-transparent underline underline-offset-4">
           Register
-        </a>
+        </Button>
       </div>
     </div>
   )

@@ -1,13 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import StarfieldBackground from '../Background/StarfieldBackground'
 import { clearAuthSession } from '../../lib/storage'
+import Panel from '../../shared/ui/Panel'
 
-function UserMenuItem({ children, onClick, danger = false }) {
+function MenuLink({ to, onClose, children }) {
+    return (
+        <Link
+            to={to}
+            role="menuitem"
+            onClick={onClose}
+            className="block w-full px-3 py-2 text-sm rounded-lg transition text-white/80 hover:bg-white/5 hover:text-white"
+        >
+            {children}
+        </Link>
+    )
+}
+
+function MenuButton({ onClick, danger = false, children }) {
     return (
         <button
             type="button"
+            role="menuitem"
             onClick={onClick}
             className={
                 'w-full text-left px-3 py-2 text-sm rounded-lg transition ' +
@@ -21,14 +36,8 @@ function UserMenuItem({ children, onClick, danger = false }) {
     )
 }
 
-function UserMenu({ user, onClose }) {
-    const navigate = useNavigate()
+function UserMenu({ user, onClose, onSignOut }) {
     const isAdmin = user?.role === 'admin'
-
-    function go(path) {
-        onClose()
-        navigate(path)
-    }
 
     return (
         <div
@@ -43,25 +52,31 @@ function UserMenu({ user, onClose }) {
             <div className="h-px bg-white/10" />
 
             <div className="p-2">
-                <UserMenuItem onClick={() => go('/profile')}>Profile</UserMenuItem>
-                <UserMenuItem onClick={() => go('/settings')}>Settings</UserMenuItem>
-                {isAdmin && <UserMenuItem onClick={() => go('/admin')}>Admin panel</UserMenuItem>}
+                <MenuLink to="/profile" onClose={onClose}>
+                    Profile
+                </MenuLink>
+                <MenuLink to="/settings" onClose={onClose}>
+                    Settings
+                </MenuLink>
+                {isAdmin ? (
+                    <MenuLink to="/admin" onClose={onClose}>
+                        Admin panel
+                    </MenuLink>
+                ) : null}
             </div>
 
             <div className="h-px bg-white/10" />
 
             <div className="p-2">
-                <UserMenuItem
+                <MenuButton
                     danger
                     onClick={() => {
                         onClose()
-                        clearAuthSession()
-                        // после логаута возвращаемся на стартовую страницу
-                        navigate('/', { replace: true })
+                        onSignOut()
                     }}
                 >
                     Sign out
-                </UserMenuItem>
+                </MenuButton>
             </div>
         </div>
     )
@@ -88,8 +103,20 @@ function UserAvatarButton({ user, isOpen, onToggle }) {
 }
 
 export default function AppLayout({ user, children }) {
+    const navigate = useNavigate()
+
     const [open, setOpen] = useState(false)
     const menuRef = useRef(null)
+
+    function closeMenu() {
+        setOpen(false)
+    }
+
+    function handleSignOut() {
+        // Central place for logout side-effects in this layout.
+        clearAuthSession()
+        navigate('/', { replace: true })
+    }
 
     useEffect(() => {
         function onKeyDown(e) {
@@ -117,14 +144,12 @@ export default function AppLayout({ user, children }) {
             <div className="fixed top-6 right-6 z-40">
                 <div className="relative" ref={menuRef}>
                     <UserAvatarButton user={user} isOpen={open} onToggle={() => setOpen((v) => !v)} />
-                    {open && <UserMenu user={user} onClose={() => setOpen(false)} />}
+                    {open ? <UserMenu user={user} onClose={closeMenu} onSignOut={handleSignOut} /> : null}
                 </div>
             </div>
 
             <div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 pb-10">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/56 p-8 shadow-2xl backdrop-blur-md">
-                    {children}
-                </div>
+                <Panel className="p-8">{children}</Panel>
             </div>
         </div>
     )
