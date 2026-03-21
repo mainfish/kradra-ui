@@ -1,7 +1,7 @@
 import { apiRequest } from '../../../lib/api'
 
 export async function loginApi({ username, password }) {
-  return apiRequest('/auth/login', {
+  return apiRequest('/api/auth/login', {
     method: 'POST',
     body: {
       username: String(username || '').trim(),

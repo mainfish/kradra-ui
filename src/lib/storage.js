@@ -1,11 +1,10 @@
 const AUTH_SESSION_KEY = 'kradra.auth.session'
+export const AUTH_SESSION_CHANGED_EVENT = 'kradra:auth-session-changed'
 
 export function saveAuthSession(session) {
   try {
-    window.localStorage.setItem(
-      AUTH_SESSION_KEY,
-      JSON.stringify(session),
-    )
+    window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session))
+    window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT))
   } catch (error) {
     console.error('Failed to save auth session', error)
   }
@@ -14,11 +13,7 @@ export function saveAuthSession(session) {
 export function getAuthSession() {
   try {
     const raw = window.localStorage.getItem(AUTH_SESSION_KEY)
-
-    if (!raw) {
-      return null
-    }
-
+    if (!raw) return null
     return JSON.parse(raw)
   } catch (error) {
     console.error('Failed to read auth session', error)
@@ -29,6 +24,7 @@ export function getAuthSession() {
 export function clearAuthSession() {
   try {
     window.localStorage.removeItem(AUTH_SESSION_KEY)
+    window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT))
   } catch (error) {
     console.error('Failed to clear auth session', error)
   }
