@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import Button from '../../../shared/ui/Button'
 import LinkButton from '../../../shared/ui/LinkButton'
@@ -8,6 +8,9 @@ import { registerAction } from '../actions/registerAction'
 
 export default function RegisterForm() {
     const navigate = useNavigate()
+    const location = useLocation()
+    const bg = location.state?.backgroundLocation
+    const modalState = bg ? { backgroundLocation: bg } : undefined
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -16,7 +19,6 @@ export default function RegisterForm() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
 
-    // After successful register+login, go to the authed home after 1s
     useEffect(() => {
         if (!success) return
         const t = window.setTimeout(() => {
@@ -85,7 +87,10 @@ export default function RegisterForm() {
             </form>
 
             <div className="text-center text-sm text-white/60">
-                Already have an account? <LinkButton to="/login">Log in</LinkButton>
+                Already have an account?{' '}
+                <LinkButton to="/login" state={modalState}>
+                    Log in
+                </LinkButton>
             </div>
         </div>
     )

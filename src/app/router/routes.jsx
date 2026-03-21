@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import AuthLayout from '../../components/Layout/AuthLayout'
@@ -26,9 +26,9 @@ function RootLayout({ session, user, isBootstrapping }) {
     )
 }
 
-function AuthModalLayout({ onClose }) {
+function AuthModalLayout({ onRequestClose }) {
     return (
-        <AuthLayout onRequestClose={onClose}>
+        <AuthLayout onRequestClose={onRequestClose}>
             <Outlet />
         </AuthLayout>
     )
@@ -39,7 +39,37 @@ export default function AppRoutes() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    // After successful login show success on form, then go to /
+    const isAuthModalRoute = location.pathname === '/login' || location.pathname === '/register'
+
+    // ✅ 1) синхронно читаем backgroundLocation из state (на первом рендере!)
+    const bgFromState = location.state?.backgroundLocation || null
+
+    // ✅ 2) и держим его в ref, чтобы при переключении /login <-> /register фон не терялся
+    const backgroundRef = useRef(bgFromState)
+
+    // ✅ 3) если модалка открылась и ref пустой, заполняем его синхронно
+    if (isAuthModalRoute && bgFromState && !backgroundRef.current) {
+        backgroundRef.current = bgFromState
+    }
+
+    // ✅ 4) когда вышли из модалок — сбрасываем фон
+    useEffect(() => {
+        if (!isAuthModalRoute) backgroundRef.current = null
+    }, [isAuthModalRoute])
+
+    const backgroundLocation = backgroundRef.current
+
+    function closeAuthModal() {
+        // Закрываем строго на backgroundLocation, а не navigate(-1),
+        // иначе “закрыть” может переключать /login <-> /register.
+        if (backgroundLocation) {
+            navigate(backgroundLocation, { replace: true })
+        } else {
+            navigate('/', { replace: true })
+        }
+    }
+
+    // После успешного логина показываем success на форме и через 1с уходим на /
     useEffect(() => {
         if (!session?.token) return
         if (location.pathname !== '/login') return
@@ -63,23 +93,37 @@ export default function AppRoutes() {
     )
 
     return (
-        <Routes>
-            <Route
-                path="/"
-                element={<RootLayout session={session} user={user} isBootstrapping={isBootstrapping} />}
-            >
-                <Route index element={homeElement} />
-                <Route path="profile" element={profileElement} />
-                <Route path="settings" element={<SettingsPage />} />
-                <Route path="admin" element={adminElement} />
-            </Route>
+        <>
+            {/* Основные роуты: если есть backgroundLocation — рендерим фон под модалкой */}
+            <Routes location={backgroundLocation || location}>
+                <Route
+                    path="/"
+                    element={<RootLayout session={session} user={user} isBootstrapping={isBootstrapping} />}
+                >
+                    <Route index element={homeElement} />
+                    <Route path="profile" element={profileElement} />
+                    <Route path="settings" element={<SettingsPage />} />
+                    <Route path="admin" element={adminElement} />
+                </Route>
 
-            <Route element={<AuthModalLayout onClose={() => navigate('/')} />}>
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/register" element={<RegisterForm />} />
-            </Route>
+                {/* Deep link: если открыть /login напрямую, будет как “страница” */}
+                <Route element={<AuthModalLayout onRequestClose={closeAuthModal} />}>
+                    <Route path="/login" element={<LoginForm />} />
+                    <Route path="/register" element={<RegisterForm />} />
+                </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+
+            {/* Если есть backgroundLocation — рендерим модалки вторым слоем поверх */}
+            {backgroundLocation ? (
+                <Routes>
+                    <Route element={<AuthModalLayout onRequestClose={closeAuthModal} />}>
+                        <Route path="/login" element={<LoginForm />} />
+                        <Route path="/register" element={<RegisterForm />} />
+                    </Route>
+                </Routes>
+            ) : null}
+        </>
     )
 }

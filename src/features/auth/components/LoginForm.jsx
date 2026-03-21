@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import Button from '../../../shared/ui/Button'
 import LinkButton from '../../../shared/ui/LinkButton'
@@ -6,6 +7,10 @@ import TextField from '../../../shared/ui/TextField'
 import { loginAction } from '../actions/loginAction'
 
 export default function LoginForm() {
+  const location = useLocation()
+  const bg = location.state?.backgroundLocation
+  const modalState = bg ? { backgroundLocation: bg } : undefined
+
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
 
@@ -31,13 +36,8 @@ export default function LoginForm() {
 
     const res = await loginAction({ username: u, password: p })
 
-    if (res?.ok) {
-      setSuccess(res.message || 'Login successful.')
-      // IMPORTANT: do NOT navigate here.
-      // App.jsx handles the delayed redirect (1s) so the success message stays visible.
-    } else {
-      setError(res?.message || 'Login failed.')
-    }
+    if (res?.ok) setSuccess(res.message || 'Login successful.')
+    else setError(res?.message || 'Login failed.')
 
     setIsSubmitting(false)
   }
@@ -85,7 +85,10 @@ export default function LoginForm() {
       </form>
 
       <div className="text-center text-sm text-white/60">
-        No account yet? <LinkButton to="/register">Register</LinkButton>
+        No account yet?{' '}
+        <LinkButton to="/register" state={modalState}>
+          Register
+        </LinkButton>
       </div>
     </div>
   )

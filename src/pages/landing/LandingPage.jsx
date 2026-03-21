@@ -1,18 +1,30 @@
+import { useLocation } from 'react-router-dom'
+
 import StarfieldBackground from '../../components/Background/StarfieldBackground'
 import Button from '../../shared/ui/Button'
 import Panel from '../../shared/ui/Panel'
 
 export default function LandingPage() {
+    const location = useLocation()
+
     return (
         <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-[#05070b]">
             <StarfieldBackground />
 
             <div className="fixed top-6 right-6 z-40 flex items-center gap-3">
-                <Button variant="ghost" to="/login">
+                <Button
+                    variant="ghost"
+                    to="/login"
+                    state={{ backgroundLocation: location }}
+                >
                     Log in
                 </Button>
 
-                <Button variant="primary" to="/register">
+                <Button
+                    variant="primary"
+                    to="/register"
+                    state={{ backgroundLocation: location }}
+                >
                     Register
                 </Button>
             </div>
