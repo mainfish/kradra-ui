@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import Button from '../../shared/ui/Button'
+import TextField from '../../shared/ui/TextField'
+
 export default function RegisterPage() {
     const navigate = useNavigate()
     const [username, setUsername] = useState('')
@@ -10,7 +13,9 @@ export default function RegisterPage() {
         <div className="space-y-6">
             <div className="text-center">
                 <h1 className="text-3xl font-semibold tracking-tight text-white">Create account</h1>
-                <p className="mt-2 text-sm text-white/60">Registration UI placeholder. Backend wiring next.</p>
+                <p className="mt-2 text-sm text-white/60">
+                    Registration UI placeholder. Backend wiring next.
+                </p>
             </div>
 
             <form
@@ -20,35 +25,26 @@ export default function RegisterPage() {
                     alert('Registration is not wired yet.')
                 }}
             >
-                <div className="space-y-2">
-                    <label className="text-sm text-white/70">Username</label>
-                    <input
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-white/30 focus:border-white/20 focus:ring-2 focus:ring-white/10"
-                        placeholder="username"
-                        autoComplete="username"
-                    />
-                </div>
+                <TextField
+                    label="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="username"
+                    autoComplete="username"
+                />
 
-                <div className="space-y-2">
-                    <label className="text-sm text-white/70">Password</label>
-                    <input
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        type="password"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none placeholder:text-white/30 focus:border-white/20 focus:ring-2 focus:ring-white/10"
-                        placeholder="password"
-                        autoComplete="new-password"
-                    />
-                </div>
+                <TextField
+                    label="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="password"
+                    type="password"
+                    autoComplete="new-password"
+                />
 
-                <button
-                    type="submit"
-                    className="w-full rounded-xl bg-white px-4 py-3 font-semibold text-black transition hover:bg-white/90"
-                >
+                <Button variant="primary" type="submit" className="w-full py-3">
                     Register
-                </button>
+                </Button>
             </form>
 
             <div className="text-center text-sm text-white/60">
