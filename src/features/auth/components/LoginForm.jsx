@@ -76,9 +76,7 @@ export default function LoginForm() {
     <div className="space-y-6">
       <div className="text-center">
         <MiniFractalIcon />
-        <h1 className="text-3xl font-semibold tracking-tight text-white">
-          Kradra Portal
-        </h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-white">Kradra Portal</h1>
         <p className="mt-2 text-sm text-white/68">Secure sign in</p>
       </div>
 

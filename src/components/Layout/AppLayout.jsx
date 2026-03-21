@@ -36,9 +36,7 @@ function UserMenu({ user, onClose }) {
             className="absolute right-0 mt-3 w-72 z-50 rounded-2xl border border-white/10 bg-slate-950/90 shadow-2xl backdrop-blur-md overflow-hidden"
         >
             <div className="px-4 py-3">
-                <div className="text-white font-semibold leading-tight">
-                    {user?.username || 'unknown'}
-                </div>
+                <div className="text-white font-semibold leading-tight">{user?.username || 'unknown'}</div>
                 <div className="text-white/50 text-sm">{user?.role || ''}</div>
             </div>
 
@@ -58,7 +56,8 @@ function UserMenu({ user, onClose }) {
                     onClick={() => {
                         onClose()
                         clearAuthSession()
-                        navigate('/login', { replace: true })
+                        // после логаута возвращаемся на стартовую страницу
+                        navigate('/', { replace: true })
                     }}
                 >
                     Sign out
@@ -115,7 +114,6 @@ export default function AppLayout({ user, children }) {
         <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-[#05070b]">
             <StarfieldBackground />
 
-            {/* Аватар всегда в правом верхнем углу */}
             <div className="fixed top-6 right-6 z-40">
                 <div className="relative" ref={menuRef}>
                     <UserAvatarButton user={user} isOpen={open} onToggle={() => setOpen((v) => !v)} />
@@ -123,7 +121,6 @@ export default function AppLayout({ user, children }) {
                 </div>
             </div>
 
-            {/* Контент с отступом сверху, чтобы не перекрывался аватаром */}
             <div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 pb-10">
                 <div className="rounded-2xl border border-white/10 bg-slate-950/56 p-8 shadow-2xl backdrop-blur-md">
                     {children}

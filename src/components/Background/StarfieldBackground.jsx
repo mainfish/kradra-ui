@@ -55,9 +55,24 @@ function drawBackground(ctx, width, height) {
   ctx.fillRect(0, 0, width, height)
 
   const glows = [
-    { x: width * 0.18, y: height * 0.24, r: Math.min(width, height) * 0.28, c: 'rgba(70, 100, 200, 0.06)' },
-    { x: width * 0.78, y: height * 0.18, r: Math.min(width, height) * 0.24, c: 'rgba(65, 145, 170, 0.045)' },
-    { x: width * 0.26, y: height * 0.8, r: Math.min(width, height) * 0.22, c: 'rgba(80, 90, 180, 0.035)' },
+    {
+      x: width * 0.18,
+      y: height * 0.24,
+      r: Math.min(width, height) * 0.28,
+      c: 'rgba(70, 100, 200, 0.06)',
+    },
+    {
+      x: width * 0.78,
+      y: height * 0.18,
+      r: Math.min(width, height) * 0.24,
+      c: 'rgba(65, 145, 170, 0.045)',
+    },
+    {
+      x: width * 0.26,
+      y: height * 0.8,
+      r: Math.min(width, height) * 0.22,
+      c: 'rgba(80, 90, 180, 0.035)',
+    },
   ]
 
   for (const glow of glows) {
@@ -118,7 +133,7 @@ function drawVignette(ctx, width, height) {
     Math.min(width, height) * 0.22,
     width / 2,
     height / 2,
-    Math.max(width, height) * 0.86,
+    Math.max(width, height) * 0.86
   )
   vignette.addColorStop(0, 'rgba(0,0,0,0)')
   vignette.addColorStop(1, 'rgba(0,0,0,0.34)')
