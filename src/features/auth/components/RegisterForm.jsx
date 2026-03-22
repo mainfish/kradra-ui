@@ -7,6 +7,12 @@ import TextField from '../../../shared/ui/TextField'
 import { registerAction } from '../actions/registerAction'
 import { AUTH_REDIRECT_DELAY_MS, ROUTES } from '../../../app/router/constants'
 
+function isValidEmail(value) {
+    // Simple, practical check (plus input type="email" browser validation).
+    // We only need "looks like an email" for now.
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
 export default function RegisterForm() {
     const navigate = useNavigate()
     const location = useLocation()
@@ -16,6 +22,7 @@ export default function RegisterForm() {
     const modalState = bg ? { backgroundLocation: bg } : undefined
 
     const [username, setUsername] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,6 +43,18 @@ export default function RegisterForm() {
         setError('')
         setSuccess('')
 
+        const evalue = String(email || '').trim()
+
+        if (!evalue) {
+            setError('Email is required.')
+            return
+        }
+        if (!isValidEmail(evalue)) {
+            setError('Please enter a valid email address.')
+            return
+        }
+
+        // Пока email никуда не отправляем — только валидируем и храним в UI.
         setIsSubmitting(true)
         const res = await registerAction({ username, password })
         setIsSubmitting(false)
@@ -74,6 +93,15 @@ export default function RegisterForm() {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="username"
                     autoComplete="username"
+                />
+
+                <TextField
+                    label="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="email@example.com"
+                    type="email"
+                    autoComplete="email"
                 />
 
                 <TextField

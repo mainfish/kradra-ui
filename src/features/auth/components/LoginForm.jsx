@@ -11,7 +11,6 @@ export default function LoginForm() {
   const location = useLocation()
 
   // Preserve modal background when switching between /login <-> /register.
-  // If user deep-linked to /login (no background), keep it undefined.
   const bg = location.state?.backgroundLocation
   const modalState = bg ? { backgroundLocation: bg } : undefined
 
@@ -32,12 +31,11 @@ export default function LoginForm() {
     const p = String(password || '')
 
     if (!u || !p) {
-      setError('Please enter username and password.')
+      setError('Please enter username/email and password.')
       return
     }
 
     setIsSubmitting(true)
-
     const res = await loginAction({ username: u, password: p })
 
     if (res?.ok) setSuccess(res.message || 'Login successful.')
@@ -67,10 +65,10 @@ export default function LoginForm() {
 
       <form className="space-y-4" onSubmit={onSubmit}>
         <TextField
-          label="Username"
+          label="Username or email"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="username"
+          placeholder="username or email"
           autoComplete="username"
         />
 
