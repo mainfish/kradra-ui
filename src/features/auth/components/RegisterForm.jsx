@@ -5,10 +5,13 @@ import Button from '../../../shared/ui/Button'
 import LinkButton from '../../../shared/ui/LinkButton'
 import TextField from '../../../shared/ui/TextField'
 import { registerAction } from '../actions/registerAction'
+import { AUTH_REDIRECT_DELAY_MS, ROUTES } from '../../../app/router/constants'
 
 export default function RegisterForm() {
     const navigate = useNavigate()
     const location = useLocation()
+
+    // Preserve modal background when switching between /login <-> /register.
     const bg = location.state?.backgroundLocation
     const modalState = bg ? { backgroundLocation: bg } : undefined
 
@@ -19,11 +22,12 @@ export default function RegisterForm() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
 
+    // After successful register+login, go to home after the same configured delay
     useEffect(() => {
         if (!success) return
         const t = window.setTimeout(() => {
-            navigate('/', { replace: true })
-        }, 800)
+            navigate(ROUTES.ROOT, { replace: true })
+        }, AUTH_REDIRECT_DELAY_MS)
         return () => window.clearTimeout(t)
     }, [success, navigate])
 
@@ -88,7 +92,7 @@ export default function RegisterForm() {
 
             <div className="text-center text-sm text-white/60">
                 Already have an account?{' '}
-                <LinkButton to="/login" state={modalState}>
+                <LinkButton to={ROUTES.LOGIN} state={modalState}>
                     Log in
                 </LinkButton>
             </div>

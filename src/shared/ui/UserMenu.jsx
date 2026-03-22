@@ -1,13 +1,9 @@
 import { Link } from 'react-router-dom'
+import { ROUTES } from '../../app/router/constants'
 
 function Spinner() {
     return (
-        <svg
-            className="h-4 w-4 animate-spin"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-        >
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle
                 className="opacity-20"
                 cx="12"
@@ -76,14 +72,14 @@ export default function UserMenu({ user, onClose, onSignOut, isSigningOut = fals
             <div className="h-px bg-white/10" />
 
             <div className="p-2">
-                <MenuLink to="/profile" onClose={onClose}>
+                <MenuLink to={ROUTES.PROFILE} onClose={onClose}>
                     Profile
                 </MenuLink>
-                <MenuLink to="/settings" onClose={onClose}>
+                <MenuLink to={ROUTES.SETTINGS} onClose={onClose}>
                     Settings
                 </MenuLink>
                 {isAdmin ? (
-                    <MenuLink to="/admin" onClose={onClose}>
+                    <MenuLink to={ROUTES.ADMIN} onClose={onClose}>
                         Admin panel
                     </MenuLink>
                 ) : null}

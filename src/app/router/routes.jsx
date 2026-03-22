@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
 import StarfieldBackground from '../../components/Background/StarfieldBackground'
@@ -14,6 +14,8 @@ import AdminPanelPage from '../../pages/admin/AdminPanelPage'
 import { LoginForm, RegisterForm } from '../../features/auth'
 import { RequireAdmin, RequireAuth } from './guards'
 import { useAuth } from '../auth/AuthProvider'
+import { useModalBackgroundLocation } from './useModalBackgroundLocation'
+import { AUTH_REDIRECT_DELAY_MS, ROUTES, isAuthModalPath } from './constants'
 
 function RootLayout({ session, user, isBootstrapping }) {
     if (!session?.token) return <LandingPage />
@@ -40,41 +42,23 @@ export default function AppRoutes() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const isAuthModalRoute = location.pathname === '/login' || location.pathname === '/register'
-
-    // Read backgroundLocation synchronously on first render
-    const bgFromState = location.state?.backgroundLocation || null
-
-    // Persist background so switching /login <-> /register doesn't lose it
-    const backgroundRef = useRef(bgFromState)
-
-    if (isAuthModalRoute && bgFromState && !backgroundRef.current) {
-        backgroundRef.current = bgFromState
-    }
-
-    useEffect(() => {
-        if (!isAuthModalRoute) backgroundRef.current = null
-    }, [isAuthModalRoute])
-
-    const backgroundLocation = backgroundRef.current
+    const isAuthModalRoute = isAuthModalPath(location.pathname)
+    const backgroundLocation = useModalBackgroundLocation(isAuthModalRoute)
 
     function closeAuthModal() {
-        // Close to the background location (NOT navigate(-1))
-        if (backgroundLocation) {
-            navigate(backgroundLocation, { replace: true })
-        } else {
-            navigate('/', { replace: true })
-        }
+        // Close to background, not navigate(-1), to avoid toggling between /login and /register
+        if (backgroundLocation) navigate(backgroundLocation, { replace: true })
+        else navigate(ROUTES.ROOT, { replace: true })
     }
 
     // After successful login show success on form, then go to /
     useEffect(() => {
         if (!session?.token) return
-        if (location.pathname !== '/login') return
+        if (location.pathname !== ROUTES.LOGIN) return
 
         const t = window.setTimeout(() => {
-            navigate('/', { replace: true })
-        }, 500)
+            navigate(ROUTES.ROOT, { replace: true })
+        }, AUTH_REDIRECT_DELAY_MS)
 
         return () => window.clearTimeout(t)
     }, [session?.token, location.pathname, navigate])
@@ -91,37 +75,34 @@ export default function AppRoutes() {
     )
 
     return (
-        // ✅ Keep the background mounted across logout/login so the page doesn't "restart"
         <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-[#05070b]">
             <StarfieldBackground />
 
             <div className="relative z-10">
+                {/* Main routes render with backgroundLocation if modal opened contextually */}
                 <Routes location={backgroundLocation || location}>
-                    <Route
-                        path="/"
-                        element={<RootLayout session={session} user={user} isBootstrapping={isBootstrapping} />}
-                    >
+                    <Route path={ROUTES.ROOT} element={<RootLayout session={session} user={user} isBootstrapping={isBootstrapping} />}>
                         <Route index element={homeElement} />
-                        <Route path="profile" element={profileElement} />
-                        <Route path="settings" element={<SettingsPage />} />
-                        <Route path="admin" element={adminElement} />
+                        <Route path={ROUTES.PROFILE.slice(1)} element={profileElement} />
+                        <Route path={ROUTES.SETTINGS.slice(1)} element={<SettingsPage />} />
+                        <Route path={ROUTES.ADMIN.slice(1)} element={adminElement} />
                     </Route>
 
                     {/* Deep link: /login opened directly => renders as a page */}
                     <Route element={<AuthModalLayout onRequestClose={closeAuthModal} />}>
-                        <Route path="/login" element={<LoginForm />} />
-                        <Route path="/register" element={<RegisterForm />} />
+                        <Route path={ROUTES.LOGIN} element={<LoginForm />} />
+                        <Route path={ROUTES.REGISTER} element={<RegisterForm />} />
                     </Route>
 
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<Navigate to={ROUTES.ROOT} replace />} />
                 </Routes>
 
-                {/* If there's a background, render auth routes again as a true overlay */}
-                {backgroundLocation ? (
+                {/* If there is a background and the current route is an auth modal, render auth routes again as true overlays */}
+                {backgroundLocation && isAuthModalRoute ? (
                     <Routes>
                         <Route element={<AuthModalLayout onRequestClose={closeAuthModal} />}>
-                            <Route path="/login" element={<LoginForm />} />
-                            <Route path="/register" element={<RegisterForm />} />
+                            <Route path={ROUTES.LOGIN} element={<LoginForm />} />
+                            <Route path={ROUTES.REGISTER} element={<RegisterForm />} />
                         </Route>
                     </Routes>
                 ) : null}

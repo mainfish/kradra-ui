@@ -3,3 +3,4 @@ export { default as RegisterForm } from './components/RegisterForm'
 
 export { loginAction } from './actions/loginAction'
 export { registerAction } from './actions/registerAction'
+export { logoutAction } from './actions/logoutAction'

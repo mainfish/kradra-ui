@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 import Panel from '../../shared/ui/Panel'
 import UserMenu from '../../shared/ui/UserMenu'
-import { logout } from '../../app/auth/logout'
+import { logoutAction } from '../../features/auth'
+import { ROUTES } from '../../app/router/constants'
 
 function delay(ms) {
     return new Promise((r) => setTimeout(r, ms))
@@ -47,10 +48,10 @@ export default function AppLayout({ user, children }) {
 
         setIsSigningOut(true)
         try {
-            await Promise.all([logout(), delay(300)])
+            await Promise.all([logoutAction(), delay(300)])
         } finally {
             setIsSigningOut(false)
-            navigate('/', { replace: true })
+            navigate(ROUTES.ROOT, { replace: true })
         }
     }
 

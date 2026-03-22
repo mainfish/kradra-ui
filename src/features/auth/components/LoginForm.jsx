@@ -5,9 +5,13 @@ import Button from '../../../shared/ui/Button'
 import LinkButton from '../../../shared/ui/LinkButton'
 import TextField from '../../../shared/ui/TextField'
 import { loginAction } from '../actions/loginAction'
+import { ROUTES } from '../../../app/router/constants'
 
 export default function LoginForm() {
   const location = useLocation()
+
+  // Preserve modal background when switching between /login <-> /register.
+  // If user deep-linked to /login (no background), keep it undefined.
   const bg = location.state?.backgroundLocation
   const modalState = bg ? { backgroundLocation: bg } : undefined
 
@@ -86,7 +90,7 @@ export default function LoginForm() {
 
       <div className="text-center text-sm text-white/60">
         No account yet?{' '}
-        <LinkButton to="/register" state={modalState}>
+        <LinkButton to={ROUTES.REGISTER} state={modalState}>
           Register
         </LinkButton>
       </div>

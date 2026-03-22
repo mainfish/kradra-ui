@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 
 import Button from '../../shared/ui/Button'
 import Panel from '../../shared/ui/Panel'
+import { ROUTES } from '../../app/router/constants'
 
 export default function LandingPage() {
     const location = useLocation()
@@ -9,11 +10,11 @@ export default function LandingPage() {
     return (
         <>
             <div className="fixed top-6 right-6 z-40 flex items-center gap-3">
-                <Button variant="ghost" to="/login" state={{ backgroundLocation: location }}>
+                <Button variant="ghost" to={ROUTES.LOGIN} state={{ backgroundLocation: location }}>
                     Log in
                 </Button>
 
-                <Button variant="primary" to="/register" state={{ backgroundLocation: location }}>
+                <Button variant="primary" to={ROUTES.REGISTER} state={{ backgroundLocation: location }}>
                     Register
                 </Button>
             </div>

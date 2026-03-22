@@ -1,5 +1,6 @@
 import { registerApi } from '../api/registerApi'
 import { loginAction } from './loginAction'
+import { mapRegisterErrorMessage } from '../lib/mapAuthErrorMessage'
 
 export async function registerAction({ username, password }) {
     const u = String(username || '').trim()
@@ -11,25 +12,20 @@ export async function registerAction({ username, password }) {
     const reg = await registerApi({ username: u, password: p })
 
     if (!reg.ok) {
-        const msg = reg.data?.error?.message || reg.data?.message || 'Registration failed.'
-        return { ok: false, message: msg, status: reg.status }
+        return { ok: false, message: mapRegisterErrorMessage(reg.status), status: reg.status }
     }
 
-    // ✅ Step 16: auto-login after successful registration
+    // Auto-login after successful registration
     const login = await loginAction({ username: u, password: p })
-
     if (!login.ok) {
         return {
             ok: false,
-            message: login.message || 'Account created, but auto-login failed. Please log in manually.',
-            status: login.errorCode || 500,
+            message: 'Account created, but auto-login failed. Please log in manually.',
         }
     }
 
     return {
         ok: true,
         message: 'Registration successful. You are now signed in.',
-        user: login.user || null,
-        token: login.token || null,
     }
 }
