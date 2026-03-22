@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import StarfieldBackground from '../Background/StarfieldBackground'
 import Panel from '../../shared/ui/Panel'
 import UserMenu from '../../shared/ui/UserMenu'
 import { logout } from '../../app/auth/logout'
@@ -47,12 +46,9 @@ export default function AppLayout({ user, children }) {
         if (isSigningOut) return
 
         setIsSigningOut(true)
-
         try {
-            // UX: чуть-чуть подержать спиннер, чтобы действие не “мигнуло” слишком быстро
             await Promise.all([logout(), delay(300)])
         } finally {
-            // даже если logout упал, logout() уже сделал clearAuthSession() в finally
             setIsSigningOut(false)
             navigate('/', { replace: true })
         }
@@ -78,9 +74,7 @@ export default function AppLayout({ user, children }) {
     }, [])
 
     return (
-        <div className="relative min-h-screen overflow-x-hidden overflow-y-auto bg-[#05070b]">
-            <StarfieldBackground />
-
+        <>
             <div className="fixed top-6 right-6 z-40">
                 <div className="relative" ref={menuRef}>
                     <UserAvatarButton
@@ -100,9 +94,9 @@ export default function AppLayout({ user, children }) {
                 </div>
             </div>
 
-            <div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 pb-10">
+            <div className="mx-auto max-w-5xl px-6 pt-24 pb-10">
                 <Panel className="p-8">{children}</Panel>
             </div>
-        </div>
+        </>
     )
 }
